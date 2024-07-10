@@ -121,6 +121,8 @@ func (d *Daemon) initHealth(spec *healthApi.Spec, cleaner *daemonCleanup, sysctl
 }
 
 func (d *Daemon) cleanupHealthEndpoint() {
+	log.Info("Cleaning up Cilium health endpoint")
+
 	// Delete the process
 	health.KillEndpoint()
 
