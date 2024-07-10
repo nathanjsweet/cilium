@@ -16,6 +16,7 @@ import (
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/util/sets"
 
+	health "github.com/cilium/cilium/cilium-health/launch"
 	"github.com/cilium/cilium/pkg/controller"
 	"github.com/cilium/cilium/pkg/endpoint"
 	"github.com/cilium/cilium/pkg/ipam"
@@ -70,9 +71,14 @@ func (d *Daemon) validateEndpoint(ep *endpoint.Endpoint) (valid bool, err error)
 	// On each restart, the health endpoint is supposed to be recreated.
 	// Hence we need to clean health endpoint state unconditionally.
 	if ep.HasLabels(labels.LabelHealth) {
-		// Ignore health endpoint and don't report
-		// it as not restored. But we need to clean up the old
-		// state files, so do this now.
+		// Remove potential health endpoint leftovers if they haven't
+		// been cleaned up yet ...
+		health.KillEndpoint()
+		health.CleanupEndpoint()
+
+		// ... plus ignore health endpoint and don't report it as not
+		// restored. But we need to clean up the old state files as
+		// well. Health endpoint will be launched later by the agent.
 		healthStateDir := ep.StateDirectoryPath()
 		scopedLog := log.WithFields(logrus.Fields{
 			logfields.EndpointID: ep.ID,
