@@ -43,10 +43,10 @@ jobs:
         with:
           comment_on_pr: false
 
-      - name: Checkout target branch to access local actions
+      - name: Checkout code
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
-          ref: ${{ github.base_ref || github.ref }}
+          ref: ${{ steps.vars.outputs.sha }}
           persist-credentials: false
 
       - name: Set Environment Variables

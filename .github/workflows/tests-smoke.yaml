@@ -85,19 +85,13 @@ jobs:
         with:
           comment_on_pr: false
 
-      - name: Checkout target branch to access local actions
-        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
-        with:
-          ref: ${{ github.base_ref || github.ref }}
-          persist-credentials: false
-
-      - name: Set Environment Variables
-        uses: ./.github/actions/set-env-variables
-
       - name: Checkout
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           persist-credentials: false
+
+      - name: Set Environment Variables
+        uses: ./.github/actions/set-env-variables
 
       - name: Get Cilium's default values
         id: default_vars
