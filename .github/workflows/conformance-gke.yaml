@@ -60,7 +60,7 @@ concurrency:
 
 env:
   clusterName: ${{ github.repository_owner }}-${{ github.event.repository.name }}-${{ github.run_id }}-${{ github.run_attempt }}
-  cilium_cli_ci_version:
+  cilium_cli_ci_version: 3856919e37506bdabdff549407f3638d871f76e6@sha256:3faa2b34ce0cf568493945eaecf1ccb79ac3bfad43e3e9d133a6c2e4ea4df235
   USE_GKE_GCLOUD_AUTH_PLUGIN: True
   # renovate: datasource=docker depName=google/cloud-sdk
   gcloud_version: 483.0.0
