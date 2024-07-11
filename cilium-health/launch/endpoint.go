@@ -201,6 +201,8 @@ func CleanupEndpoint() {
 				if err != nil {
 					scopedLog.WithError(err).Infof("Couldn't delete cilium-health %s device",
 						option.Config.DatapathMode)
+				} else {
+					scopedLog.Debug("Removed lxc_health devices!!! form CleanupEndpoint")
 				}
 			} else {
 				scopedLog.WithError(err).Debug("Didn't find existing device")
@@ -308,6 +310,7 @@ func LaunchAsEndpoint(baseCtx context.Context,
 	cmd.SetTarget(binaryName)
 	cmd.SetArgs(args)
 	log.Debugf("Spawning health endpoint with command %q %q", binaryName, args)
+	log.Debug("Created lxc_health devices!!!")
 
 	// Run the health binary inside a netnamespace. Since `Do()` implicitly does
 	// `runtime.LockOSThread` the exec'd binary is guaranteed to inherit the
