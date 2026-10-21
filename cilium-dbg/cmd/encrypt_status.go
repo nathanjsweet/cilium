@@ -9,10 +9,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"os/exec"
 	"reflect"
-	"regexp"
-	"strconv"
 	"strings"
 
 	"github.com/prometheus/procfs"
@@ -33,14 +30,7 @@ import (
 	wgTypes "github.com/cilium/cilium/pkg/wireguard/types"
 )
 
-const (
-	// Cilium uses reqid 1 to tie the IPsec security policies to their matching state
-	ciliumReqId = "1"
-)
-
 var (
-	regex = regexp.MustCompile("oseq[[:blank:]]0[xX]([[:xdigit:]]+)")
-
 	errWireguardStateMismatch = errors.New("wireguard state mismatch between kernel and agent")
 )
 
@@ -312,32 +302,14 @@ func getXfrmStats(mountPoint string) (int64, map[string]int64, error) {
 	return countErrors, errorMap, nil
 }
 
-func extractMaxSequenceNumber(ipOutput string) (int64, error) {
-	maxSeqNum := int64(0)
-	for line := range strings.SplitSeq(ipOutput, "\n") {
-		matched := regex.FindStringSubmatchIndex(line)
-		if matched != nil {
-			oseq, err := strconv.ParseInt(line[matched[2]:matched[3]], 16, 64)
-			if err != nil {
-				return 0, fmt.Errorf("failed to parse sequence number '%s': %w",
-					line[matched[2]:matched[3]], err)
-			}
-			if oseq > maxSeqNum {
-				maxSeqNum = oseq
-			}
-		}
-	}
-	return maxSeqNum, nil
-}
-
 func maxSequenceNumber() (string, error) {
-	out, err := exec.Command("ip", "xfrm", "state", "list", "reqid", ciliumReqId).Output()
+	seqs, err := xfrmStateOutputSeqs(ipsec.DefaultReqID)
 	if err != nil {
 		return "", fmt.Errorf("cannot get xfrm states: %w", err)
 	}
-	maxSeqNum, err := extractMaxSequenceNumber(string(out))
-	if err != nil {
-		return "", err
+	maxSeqNum := uint64(0)
+	for _, seq := range seqs {
+		maxSeqNum = max(maxSeqNum, seq)
 	}
 	if maxSeqNum == 0 {
 		return "N/A", nil
